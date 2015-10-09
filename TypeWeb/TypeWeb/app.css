@@ -51,3 +51,35 @@ table {
     border-collapse: collapse;
     border-spacing: 0;
 }
+
+
+.container {
+    border:solid thin #a80000;
+    margin:10px;
+    padding:10px;
+}
+
+colorpicker {
+    display:block;
+    border:solid thin #eee;
+    background:#fff;
+    width:200px;
+    padding:3px;
+    border-radius:2px;
+    box-shadow:0 0 2px #eee;
+}
+
+colorpicker color {
+    display:block;
+    height:24px;
+    line-height:24px;
+    font-size:12px;
+    text-indent:10px;
+    text-shadow:1px 1px 0 #fff;
+    font-family:'Segoe UI';
+    color:attr(data-value);
+}
+
+colorpicker color:nth-child(2n+1){
+    background:#f0f0f0;
+}
