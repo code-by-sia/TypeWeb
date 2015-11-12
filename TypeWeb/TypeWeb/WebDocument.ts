@@ -13,7 +13,7 @@ class WebDocument extends WebControl {
 
     protected get eventTarget() { return window; }
 
-    public find(selector) {
+    public init(selector) {
         let item = <any>$(selector)[0];
         if (item) {
             if (!item.control) this.initialControl(item);

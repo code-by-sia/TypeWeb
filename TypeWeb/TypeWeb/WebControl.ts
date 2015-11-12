@@ -4,6 +4,7 @@ class WebControl {
 
     private load = new WebControlEvent<WebControlEventArgs>();
     private resize = new WebControlEvent<WebControlEventArgs>();
+    private scroll = new WebControlEvent<WebControlEventArgs>();
     private click = new WebControlEvent<WebControlEventArgs>();
     private mouseDown = new WebControlEvent<WebControlMouseEventArgs>();
     private mouseMove = new WebControlEvent<WebControlMouseEventArgs>();
@@ -15,6 +16,7 @@ class WebControl {
     
     public get Load() { return this.load; }
     public get Resize() { return this.resize; }
+    public get Scroll() { return this.scroll; }
     public get Click() { return this.click; }
     public get MouseDown() { return this.mouseDown; }
     public get MouseUp() { return this.mouseUp; }
@@ -25,6 +27,7 @@ class WebControl {
     protected OnLoad() { }
     protected OnInit() { }
     protected OnResize() { }
+    protected OnScroll() { }
     protected OnMouseDown(args: WebControlMouseEventArgs) { }
     protected OnMouseMove(args: WebControlMouseEventArgs) { }
     protected OnMouseUp(args: WebControlMouseEventArgs) { }
@@ -51,7 +54,12 @@ class WebControl {
     public set width(value) { $(this.eventTarget).width(value); }
 
 
+    public find(selector) { return this.init(selector); }
     public findAll(selector) {
+        return this.initAll(selector);
+    }
+
+    public initAll(selector) {
         let items = $(this.element).find(selector);
         let results = [];
         for (let i = 0; i < items.length; i++) {
@@ -65,7 +73,7 @@ class WebControl {
         return results;
     }
 
-    public find(selector) {
+    public init(selector) {
         let item = <any>$(this.element).find(selector)[0];
         if (item) {
             if (!item.control) this.initialControl(item);
@@ -75,22 +83,13 @@ class WebControl {
     }
 
     private setEvents() {
-
-        //this.load.subscribe(this.OnLoad);
-        //this.resize.subscribe(this.OnResize);
-        //this.mouseDown.subscribe(this.OnMouseDown);
-        //this.mouseMove.subscribe(this.OnMouseMove);
-        //this.mouseUp.subscribe(this.OnMouseUp);
-        //this.keyDown.subscribe(this.OnKeyDown);
-        //this.keyPress.subscribe(this.OnKeyPress);
-        //this.keyUp.subscribe(this.OnKeyUp);
-
-
+         
         let et = this.node;
         let th = this;
 
         et.addEventListener("load", () => { th.OnLoad(); th.load.trigger(th) });
         et.addEventListener("resize", () => { th.OnResize(); th.resize.trigger(th) });
+        et.addEventListener("scroll", () => { th.OnScroll(); th.scroll.trigger(th) });
 
         et.addEventListener("mousedown", (e: MouseEvent) => {
             let args = { AltKey: e.altKey, ControlKey: e.ctrlKey, ShiftKey: e.shiftKey, X: e.x, Y: e.y };
