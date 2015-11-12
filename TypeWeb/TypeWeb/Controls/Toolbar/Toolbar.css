@@ -1,0 +1,35 @@
+﻿.toolbar-web-control {
+    display:flex;
+    flex-direction:row;
+    flex-wrap:wrap;
+    align-content:center;
+    align-items:center;
+    justify-content:center;
+    border-bottom:solid thin #aaa;
+    background:linear-gradient(#fff,#eee);
+    padding:0 10px;
+}
+
+.toolbar-item-spliter-web-control{
+    display:inline;
+    width:1px;
+    border-left:solid thin #a80000;  
+    height:10px;
+    width:1px;
+    margin:0 3px;
+}
+.toolbar-item-web-control{
+    display:inline;
+    font-family:'Segoe UI';
+    font-size:12px;
+    border:solid thin transparent;
+    cursor:pointer;
+    background-color:transparent;
+    padding:5px 10px;
+    margin:5px 0;
+}
+
+.toolbar-web-control > .toolbar-item-web-control:hover {
+    background:#fff;
+    border:solid thin #ccc;
+}

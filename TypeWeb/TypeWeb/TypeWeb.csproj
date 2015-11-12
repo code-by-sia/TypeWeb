@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app.css" />
+    <Content Include="Controls\Toolbar\Toolbar.css" />
     <Content Include="index.html" />
     <None Include="Scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="Scripts\jquery-2.1.4.js" />
@@ -32,7 +33,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="CustomControls\ColorPicker.ts" />
-    <TypeScriptCompile Include="CustomControls\Toolbar.ts" />
+    <TypeScriptCompile Include="Controls\Toolbar\Toolbar.ts" />
     <TypeScriptCompile Include="CustomControls\Wrapper.ts" />
     <TypeScriptCompile Include="WebDocument.ts" />
     <TypeScriptCompile Include="Scripts\typings\jquery\jquery.d.ts" />
