@@ -1,4 +1,4 @@
-﻿///<reference path="../WebControl" />
+﻿///<reference path="../WebControl.ts" />
 
 class Color extends WebControl {
 
@@ -21,7 +21,6 @@ class ColorPicker extends WebControl {
     public Colors: Color[];
 
     OnInit() {
-        console.log('asdasda');
         super.OnInit();
         this.Colors= this.findAll('color');    
     }

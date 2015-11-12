@@ -1,10 +1,12 @@
-﻿///<reference path="WebControlEvent" />
+﻿///<reference path="WebControlEvent.ts" />
 
 class WebControl {
 
+
+
+
     private load = new WebControlEvent<WebControlEventArgs>();
     private resize = new WebControlEvent<WebControlEventArgs>();
-    private scroll = new WebControlEvent<WebControlEventArgs>();
     private click = new WebControlEvent<WebControlEventArgs>();
     private mouseDown = new WebControlEvent<WebControlMouseEventArgs>();
     private mouseMove = new WebControlEvent<WebControlMouseEventArgs>();
@@ -13,10 +15,11 @@ class WebControl {
     private keyDown = new WebControlEvent<WebControlKeyboardEventArgs>();
     private keyPress = new WebControlEvent<WebControlKeyboardEventArgs>();
     private keyUp = new WebControlEvent<WebControlKeyboardEventArgs>();
-    
+
+    private controls: WebControl[] = [];
+
     public get Load() { return this.load; }
     public get Resize() { return this.resize; }
-    public get Scroll() { return this.scroll; }
     public get Click() { return this.click; }
     public get MouseDown() { return this.mouseDown; }
     public get MouseUp() { return this.mouseUp; }
@@ -24,10 +27,40 @@ class WebControl {
     public get KeyDown() { return this.keyDown; }
     public get KeyUp() { return this.keyUp; }
 
+
+    private controlsOf(el) {
+        let result: WebControl[] = [];
+        var kids = el.children;
+        for (let i = 0; i < kids.length; i++) {
+            let kid = kids[i];
+            if ((<any>kid).control)
+                result.push((<any>kid).control);
+            else {
+                let results = this.controlsOf(kid);
+                for (let j = 0; j < results.length; j++)
+                    result.push(results[j]);
+            }
+        }
+        return result;
+    }
+
+    public get Controls() {
+        return this.controlsOf(this.element);
+    }
+
+    public get Parent() {
+        let el = this.element.parentElement;
+        while (el) {
+            if (el.hasOwnProperty('control'))
+                return <WebControl>((<any>el).control);
+            el = el.parentElement;
+        }
+        return null;
+    }
+
     protected OnLoad() { }
     protected OnInit() { }
     protected OnResize() { }
-    protected OnScroll() { }
     protected OnMouseDown(args: WebControlMouseEventArgs) { }
     protected OnMouseMove(args: WebControlMouseEventArgs) { }
     protected OnMouseUp(args: WebControlMouseEventArgs) { }
@@ -45,22 +78,17 @@ class WebControl {
     protected get eventTarget() { return <EventTarget>this.node; }
     protected get element() { return <HTMLElement>this.node; }
 
-    public show() { $(this.element).show(); }
-    public hide() { $(this.element).hide(); }
+    public show() { this.element.style.display = 'block'; }
+    public hide() { this.element.style.display = 'none'; }
 
-    public get height() { return $(this.eventTarget).height(); }
-    public set height(value) { $(this.eventTarget).height(value); }
-    public get width() { return $(this.eventTarget).width(); }
-    public set width(value) { $(this.eventTarget).width(value); }
+    public get height() { return (<HTMLElement>this.eventTarget).clientHeight; }
+    public set height(value) { (<HTMLElement>this.eventTarget).clientHeight = value; }
+    public get width() { return (<HTMLElement>this.eventTarget).clientWidth; }
+    public set width(value) { (<HTMLElement>this.eventTarget).clientWidth = value; }
 
 
-    public find(selector) { return this.init(selector); }
     public findAll(selector) {
-        return this.initAll(selector);
-    }
-
-    public initAll(selector) {
-        let items = $(this.element).find(selector);
+        let items = this.element.querySelectorAll(selector);
         let results = [];
         for (let i = 0; i < items.length; i++) {
             let item = <any>items[i];
@@ -70,26 +98,28 @@ class WebControl {
                 if (item.control) results.push(item.control);
             }
         }
+
+
         return results;
     }
 
-    public init(selector) {
-        let item = <any>$(this.element).find(selector)[0];
+    public find(selector) {
+        let item = <any>this.element.querySelectorAll(selector)[0];
         if (item) {
             if (!item.control) this.initialControl(item);
             if (item.control) return item.control;
+
         }
         return null;
     }
 
     private setEvents() {
-         
+
         let et = this.node;
         let th = this;
 
         et.addEventListener("load", () => { th.OnLoad(); th.load.trigger(th) });
         et.addEventListener("resize", () => { th.OnResize(); th.resize.trigger(th) });
-        et.addEventListener("scroll", () => { th.OnScroll(); th.scroll.trigger(th) });
 
         et.addEventListener("mousedown", (e: MouseEvent) => {
             let args = { AltKey: e.altKey, ControlKey: e.ctrlKey, ShiftKey: e.shiftKey, X: e.x, Y: e.y };
@@ -133,19 +163,50 @@ class WebControl {
     }
 
     protected initialControl(element: HTMLElement) {
-        if ((<any>element).control) return;
+        if ((<any>element).control) {
+            this.controls.push((<any>element).control);
+            return;
+        };
         let type = this.getType(element);
-        (<any>element).control = WebControl.provideControl(type, element);
+        let control = WebControl.provideControl(type, element);
+        (<any>element).control = control;
+        this.controls.push(control);
     }
 
-    public static provideControl(type: string, el: Element): WebControl {
-        for (let t in window) {
-            let winType = t + "";
-            if ((winType).toLowerCase() == type.toLowerCase()) {
-                return new window[winType](el);
+    public static provideControl(typeName: string, el: Element): WebControl {
+        for (let t in window) if (((t + "").toLowerCase() == typeName.toLowerCase())) {
+
+            if (!(window[typeName] instanceof WebControl)) {
+                return new window[t + ""](el);
             }
         }
-        throw ("no implementation has been found fot type " + type);
+        throw ("no implementation has been found fot type " + typeName);
+    }
+
+}
+
+interface IDraggableWebControl {
+    left: number;
+    top: number;
+    moveTo(x, y);
+}
+
+class DraggableWebControl extends WebControl implements IDraggableWebControl {
+
+    public get left() { return this.element.clientLeft - this.element.offsetLeft; }
+    public get top() { return this.element.offsetTop + this.element.clientTop; }
+
+    public set left(value) {
+        this.element.style.left = value + 'px';
+    }
+    public set top(value) {
+        this.element.style.top = value + 'px';
+    }
+
+
+    moveTo(x: number, y: number) {
+        this.left = x;
+        this.top = y;
     }
 
 }
